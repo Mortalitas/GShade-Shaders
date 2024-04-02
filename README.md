@@ -6,5 +6,5 @@ A select subset of shaders included in the [GShade project](https://github.com/M
 For licensing information and credits, please refer to the header of any given shader file.
 
 Previously, this repository was used for historical GShade patch notes:
- - If you were looking for the latest GShade project patch notes, please see: https://github.com/Mortalitas/GShade-Shaders/releases
- - If you were looking for legacy/historical GShade project patch notes, please see: https://github.com/Mortalitas/GShade/releases
+ - If you were looking for the latest GShade project patch notes, please see: https://github.com/Mortalitas/GShade/releases
+ - If you were looking for legacy/historical GShade project patch notes, please see: https://github.com/Mortalitas/GShade-Shaders/releases
