@@ -1,5 +1,5 @@
 # GShade-Shaders
-A select subset of shaders which are included in the [GShade project](https://github.com/Mortalitas/GShade) which were created or are maintained by [Marot](https://github.com/Mortalitas).
+A select subset of shaders included in the [GShade project](https://github.com/Mortalitas/GShade) which were created or are maintained by [Marot](https://github.com/Mortalitas).
 
 **This repository is meant for use with [ReShade](https://reshade.me), please do not add it to any GShade installations as you may experience errors or other shader conflicts.**
 
