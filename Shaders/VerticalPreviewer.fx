@@ -709,8 +709,7 @@ void PS_VPreOut(in float4 pos : SV_Position, float2 texCoord : TEXCOORD, out flo
 technique Vertical_Previewer <
 ui_label = "Vertical Previewer and Composition (Hidden In Screenshots)";
 enabled_in_screenshot = false;
-ui_tooltip = "+++　Vertical Previewer and Composition +++\n"
-                     "***バーチカル プレビュワー アンド コンポジション***\n\n"
+ui_tooltip = "+++ Vertical Previewer and Composition +++\n"
                      "By showing a preview on the screen to protect\n"
                      "your neck while taking vertical screenshots.\n\n"
                      "      Can be used as a composition guide\n"
