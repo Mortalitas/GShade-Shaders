@@ -28,6 +28,7 @@
 uniform int ResolutionX <
 	ui_type = "input";
 	ui_label = "Resolution X";
+	ui_tooltip = "In order to use this setting as shown, please install the \"UIBind\" addon created by cot6.\n\nAlternatively, you may specify the desired resolution width in the Preprocessor Definitions below by adjusting ResolutionXGCRT";
 	ui_bind = "ResolutionXGCRT";
 > = 320;
 
@@ -38,6 +39,7 @@ uniform int ResolutionX <
 uniform int ResolutionY <
 	ui_type = "input";
 	ui_label = "Resolution Y";
+	ui_tooltip = "In order to use this setting as shown, please install the \"UIBind\" addon created by cot6.\n\nAlternatively, you may specify the desired resolution height in the Preprocessor Definitions below by adjusting ResolutionYGCRT";
 	ui_bind = "ResolutionYGCRT";
 > = 240;
 
@@ -211,12 +213,7 @@ uniform uint shadowMask <
 	ui_max = 7;
 	ui_step = 1;
 	ui_label = "CRT Mask: 1:CGWG, 2-5:Lottes, 6-7:'Trinitron'";
-	ui_bind = "ShadowMaskGCRT";
 > = 1;
-
-#ifndef ShadowMaskGCRT
-#define ShadowMaskGCRT 1
-#endif
 
 uniform float masksize <
 	ui_type = "slider";
@@ -406,91 +403,129 @@ float3 mask1(float2 pos, float3 c)
 	pos = floor(pos / masksize);
 	float3 mask = maskDark;
 
-#if ShadowMaskGCRT == 0
-	mask = 1.0;
-#elif ShadowMaskGCRT == 1
-	pos.x = frac(pos.x * 0.5);
-	const float mc = 1.0 - CGWG;
-	if(pos.x < 0.5)
+	switch (shadowMask)
 	{
-		mask.r = 1.1;
-		mask.g = mc;
-		mask.b = 1.1;
+		case 0:
+		{
+			mask = 1.0;
+			
+			break;
+		}
+		case 1:
+		{
+			pos.x = frac(pos.x * 0.5);
+			const float mc = 1.0 - CGWG;
+			if(pos.x < 0.5)
+			{
+				mask.r = 1.1;
+				mask.g = mc;
+				mask.b = 1.1;
+			}
+			else
+			{
+				mask.r = mc;
+				mask.g = 1.1;
+				mask.b = mc;
+			}
+			
+			break;
+		}
+		case 2:
+		{
+			if(frac(pos.x / 6.0) < 0.5 && frac((pos.y + 1.0) / 2.0) < 0.5)
+				pos.x = frac(pos.x / 3.0);
+			if(pos.x < 0.333)
+				mask.r = maskLight;
+			else if(pos.x < 0.666)
+				mask.g = maskLight;
+			else
+				mask.b = maskLight;
+			mask *= maskDark;
+
+			break;
+		}
+		case 3:
+		{
+			pos.x = frac(pos.x / 3.0);
+			if(pos.x < 0.333)
+				mask.r = maskLight;
+			else if(pos.x < 0.666)
+				mask.g = maskLight;
+			else
+				mask.b = maskLight;
+
+			break;
+		}
+		case 4:
+		{
+			pos.x += pos.y * 3.0;
+			pos.x = frac(pos.x / 6.0);
+			if(pos.x < 0.333)
+				mask.r = maskLight;
+			else if(pos.x < 0.666)
+				mask.g = maskLight;
+			else
+				mask.b = maskLight;
+
+			break;
+		}
+		case 5:
+		{
+			pos.xy = floor(pos.xy * float2(1.0, 0.5));
+			pos.x += pos.y * 3.0;
+			pos.x = frac(pos.x / 6.0);
+			if(pos.x < 0.333)
+				mask.r = maskLight;
+			else if(pos.x < 0.666)
+				mask.g = maskLight;
+			else
+				mask.b = maskLight;
+
+			break;
+		}
+		case 6:
+		{
+			const float mx = max(max(c.r, c.g), c.b);
+			const float adj = 0.80 * maskLight - 0.5 * (0.80 * maskLight - 1.0) * mx + 0.75 * (1.0 - mx);
+			mask = min(1.25 * max(mx - mcut, 0.0) / (1.0 - mcut), maskDark + 0.2 * (1.0 - maskDark) * mx);
+			pos.x = frac(pos.x / 2.0);
+			if(pos.x < 0.5)
+			{
+				mask.r = adj;
+				mask.b = adj;
+			}
+			else
+				mask.g = adj;
+
+			break;
+		}
+		case 7:
+		{
+			const float mx = max(max(c.r, c.g), c.b);
+			const float adj = 0.80 * maskLight - 0.5 * (0.80 * maskLight - 1.0) * mx + 0.75 * (1.0 - mx);
+			mask = min(1.33 * max(mx - mcut, 0.0) / (1.0 - mcut), maskDark + 0.225 * (1.0 - maskDark) * mx);
+			pos.x = frac(pos.x / 3.0);
+			if(pos.x < 0.333)
+				mask.r = adj;
+			else if(pos.x < 0.666)
+				mask.g = adj;
+			else
+				mask.b = adj;
+
+			break;
+		}
+		case 8:
+		{
+			const float mx = max(max(c.r, c.g), c.b);
+			const float maskTmp = min(1.6 * max(mx - mcut, 0.0) / (1.0 - mcut), 1.0 - CGWG);
+			mask = float3(maskTmp, maskTmp, maskTmp);
+			pos.x = frac(pos.x / 2.0);
+			if(pos.x < 0.5)
+				mask = 1.0 + 0.6 * (1.0 - mx);
+
+			break;
+		}
 	}
-	else
-	{
-		mask.r = mc;
-		mask.g = 1.1;
-		mask.b = mc;
-	}
-#elif ShadowMaskGCRT == 2
-	if(frac(pos.x / 6.0) < 0.5 && frac((pos.y + 1.0) / 2.0) < 0.5)
-		pos.x = frac(pos.x / 3.0);
-	if(pos.x < 0.333)
-		mask.r = maskLight;
-	else if(pos.x < 0.666)
-		mask.g = maskLight;
-	else
-		mask.b = maskLight;
-	mask *= maskDark;
-#elif ShadowMaskGCRT == 3
-	pos.x = frac(pos.x / 3.0);
-	if(pos.x < 0.333)
-		mask.r = maskLight;
-	else if(pos.x < 0.666)
-		mask.g = maskLight;
-	else
-		mask.b = maskLight;
-#elif ShadowMaskGCRT == 4
-	pos.x += pos.y * 3.0;
-	pos.x = frac(pos.x / 6.0);
-	if(pos.x < 0.333)
-		mask.r = maskLight;
-	else if(pos.x < 0.666)
-		mask.g = maskLight;
-	else
-		mask.b = maskLight;
-#elif ShadowMaskGCRT == 5
-	pos.xy = floor(pos.xy * float2(1.0, 0.5));
-	pos.x += pos.y * 3.0;
-	pos.x = frac(pos.x / 6.0);
-	if(pos.x < 0.333)
-		mask.r = maskLight;
-	else if(pos.x < 0.666)
-		mask.g = maskLight;
-	else
-		mask.b = maskLight;
-#elif ShadowMaskGCRT == 6
-	const float mx = max(max(c.r, c.g), c.b);
-	const float adj = 0.80 * maskLight - 0.5 * (0.80 * maskLight - 1.0) * mx + 0.75 * (1.0 - mx);
-	mask = min(1.25 * max(mx - mcut, 0.0) / (1.0 - mcut), maskDark + 0.2 * (1.0 - maskDark) * mx);
-	pos.x = frac(pos.x / 2.0);
-	if(pos.x < 0.5)
-	{
-		mask.r = adj;
-		mask.b = adj;
-	}
-	else
-		mask.g = adj;
-#elif ShadowMaskGCRT == 7
-	const float mx = max(max(c.r, c.g), c.b);
-	const float adj = 0.80 * maskLight - 0.5 * (0.80 * maskLight - 1.0) * mx + 0.75 * (1.0 - mx);
-	mask = min(1.33 * max(mx - mcut, 0.0) / (1.0 - mcut), maskDark + 0.225 * (1.0 - maskDark) * mx);
-	pos.x = frac(pos.x / 3.0);
-	if(pos.x < 0.333)
-		mask.r = adj;
-	else if(pos.x < 0.666)
-		mask.g = adj;
-	else
-		mask.b = adj;
-#elif ShadowMaskGCRT == 8
-	const float mx = max(max(c.r, c.g), c.b);
-	const float maskTmp = min(1.6 * max(mx - mcut, 0.0) / (1.0 - mcut), 1.0 - CGWG);
-	mask = float3(maskTmp, maskTmp, maskTmp);
-	pos.x = frac(pos.x / 2.0);
-	if(pos.x < 0.5)
-		mask = 1.0 + 0.6 * (1.0 - mx);
-#endif
 
 	return mask;
 }

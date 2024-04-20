@@ -27,13 +27,8 @@
 
 uniform bool bIgnore <
 	ui_label = "Ignore Fully Transparent Pixels";
-	ui_tooltip = "If this setting is enabled, pixels with a alpha value of 0 will not be modified and remain fully transparent.";
-	ui_bind = "GLOBAL_ALPHA_IGNORE";
+	ui_tooltip = "If this setting is enabled, pixels with an alpha value of 0 will not be modified and remain fully transparent.";
 > = true;
-
-#ifndef GLOBAL_ALPHA_IGNORE
-	#define GLOBAL_ALPHA_IGNORE 1
-#endif
 
 uniform float fOpacity <
 	ui_label = "Alpha";
@@ -45,11 +40,10 @@ float4 GlobalAlphaPS(float4 pos : SV_Position, float2 texcoord : TEXCOORD) : SV_
 {
 	const float4 back = tex2D(ReShade::BackBuffer, texcoord);
 
-#if GLOBAL_ALPHA_IGNORE
-	return float4(back.rgb, back.a <= 0.0 ? back.a : fOpacity);
-#else
-	return float4(back.rgb, fOpacity);
-#endif
+	if (bIgnore)
+		return float4(back.rgb, back.a <= 0.0 ? back.a : fOpacity);
+	else
+		return float4(back.rgb, fOpacity);
 }
 
 technique GlobalAlpha
