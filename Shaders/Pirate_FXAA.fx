@@ -44,10 +44,11 @@ float4 FastFXAA(float4 colorIN : COLOR, float2 coord : TEXCOORD) : COLOR {
 	float3 blur = colorIN.rgb;
 	const float intensity = dot(blur, 0.3333);
 	
+	[unroll]
 	for(int i=0; i < 8; i++) {
 		ret = tex2D(ReShade::BackBuffer, coord + tap[i] * BUFFER_PIXEL_SIZE * FXAA_RADIUS);
 		float weight = abs(intensity - dot(ret.rgb, 0.33333));
-		blur = lerp(blur, ret.rgb, weight / 8);
+		blur = lerp(blur, ret.rgb, weight / 8.0);
 		edge += weight;
 	}
 	
