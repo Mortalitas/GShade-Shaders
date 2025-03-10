@@ -60,11 +60,11 @@ uniform int bKeepUIForceType <
 > = 0;
 #endif
 
-#if KeepUIType != 0 && !ADDON_RESHADE_EFFECT_SHADER_TOGGLER // Supported game & REST add-on is not present.
+#if KeepUIType != 0 && !ADDON_RESHADE_EFFECT_SHADER_TOGGLER // Enabled & REST add-on is not present.
 uniform bool bKeepUIOcclude <
     ui_category = "Options";
     ui_label = "Occlusion Assistance";
-    ui_tooltip = "Enable if you notice odd graphical issues with Bloom or similar shaders. May cause problems with SSDO when enabled.\n\nIn order to use this setting as shown, please install the \"UIBind\" addon created by cot6.\n\nAlternatively, you may specify the type of UI saving you would like to use in the Preprocessor Definitions below by adjusting KeepUIOccludeAssist";
+    ui_tooltip = "Enable if you notice odd graphical issues with Bloom or similar shaders. May cause problems with SSDO when enabled.\n\nIn order to use this setting as shown, please install the \"UIBind\" addon created by cot6.\n\nAlternatively, you may enable or disable this setting in the Preprocessor Definitions below by adjusting KeepUIOccludeAssist";
     ui_bind = "KeepUIOccludeAssist";
 > = 0;
 
@@ -85,7 +85,7 @@ uniform float fKeepUIOccludeMinAlpha <
 uniform bool bKeepUIHideInScreenshot <
     ui_category = "Options";
     ui_label = "Hide KeepUI In Screenshots";
-    ui_tooltip = "Enable to hide the effects of KeepUI when taking screenshots.\n\nThis is very helpful in games where portions of the screen which are not part of the UI may be detected as such.\n\nIn order to use this setting as shown, please install the \"UIBind\" addon created by cot6.\n\nAlternatively, you may specify the type of UI saving you would like to use in the Preprocessor Definitions below by adjusting KeepUIHideInScreenshots";
+    ui_tooltip = "Enable to hide the effects of KeepUI when taking screenshots.\n\nThis is very helpful in games where portions of the screen which are not part of the UI may be detected as such.\n\nIn order to use this setting as shown, please install the \"UIBind\" addon created by cot6.\n\nAlternatively, you may enable or disable this setting in the Preprocessor Definitions below by adjusting KeepUIHideInScreenshots";
     ui_bind = "KeepUIHideInScreenshots";
 > = 0;
 
@@ -114,7 +114,7 @@ uniform int iBlendSource <
 #include "ReShade.fxh"
 #endif
 
-#if KeepUIType != 0 && !ADDON_RESHADE_EFFECT_SHADER_TOGGLER // Supported game & REST add-on is not present.
+#if KeepUIType != 0 && !ADDON_RESHADE_EFFECT_SHADER_TOGGLER // Enabled & REST add-on is not present.
 texture KeepUI_Tex { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; };
 sampler KeepUI_Sampler { Texture = KeepUI_Tex; };
 
@@ -180,7 +180,7 @@ technique FFKeepUI <
 #endif
 >
 {
-#if KeepUIType != 0 && !ADDON_RESHADE_EFFECT_SHADER_TOGGLER // Supported game & REST add-on is not present.
+#if KeepUIType != 0 && !ADDON_RESHADE_EFFECT_SHADER_TOGGLER // Enabled & REST add-on is not present.
     pass
     {
         VertexShader = PostProcessVS;
@@ -210,7 +210,7 @@ technique FFRestoreUI <
 #endif
 >
 {
-#if KeepUIType != 0 && !ADDON_RESHADE_EFFECT_SHADER_TOGGLER // Supported game & REST add-on is not present.
+#if KeepUIType != 0 && !ADDON_RESHADE_EFFECT_SHADER_TOGGLER // Enabled & REST add-on is not present.
     pass
     {
         VertexShader = PostProcessVS;
