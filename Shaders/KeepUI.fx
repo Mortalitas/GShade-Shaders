@@ -26,13 +26,14 @@
 //
 // Lightly optimized by Marot Satil for the GShade project.
 // Special thanks to Sleeps_Hungry for the addition of the FFOccludeUI technique.
+// Special thanks to Leon Aquitaine for the addition of the UI detection opacity threshold.
 
 #ifndef KeepUIDebug
     #define KeepUIDebug 0 // Set to 1 if you need to use KeepUI's debug features.
 #endif
 
 #ifndef KeepUIType
-    #define KeepUIType 0 // 0 - Default, turns off UI saving for games without automatic detection. | 1 - Alpha-based/Final Fantasy XIV's UI saving mode | 2 - Shared depth buffer UI saving.
+    #define KeepUIType 0 // 0 - Default, turns off UI saving for games without automatic detection. | 1 - Alpha-based/Final Fantasy XIV's UI saving mode | 2 - Depth buffer UI saving.
 
     #if (__APPLICATION__ == 0x6f24790f || (__APPLICATION__ == 0xf133c441 && !(__RENDERER__ & 0x20000))) && KeepUIType == 0 // Final Fantasy XIV & The Sims 4 (DirectX 9 Only)
         #undef KeepUIType
@@ -61,6 +62,29 @@ uniform int bKeepUIForceType <
 #endif
 
 #if KeepUIType != 0 && !ADDON_RESHADE_EFFECT_SHADER_TOGGLER // Enabled & REST add-on is not present.
+#if KeepUIType == 1
+uniform bool bKeepUIAlpha <
+    ui_category = "Options";
+    ui_label = "Max Alpha Adjustment";
+    ui_tooltip = "Enable if you notice transparent UI elements which are not detected by the shader. May lead to false-positives.\n\nIn order to use this setting as shown, please install the \"UIBind\" addon created by cot6.\n\nAlternatively, you may enable or disable this setting in the Preprocessor Definitions below by adjusting KeepUIOccludeAssist";
+    ui_bind = "KeepUIAlpha";
+> = 1;
+
+#ifndef KeepUIAlpha
+    #define KeepUIAlpha 1
+#endif
+
+#if KeepUIAlpha
+uniform float fKeepUIMaxAlpha <
+    ui_type = "slider";
+    ui_category = "Options";
+    ui_label = "Alpha Threshold";
+    ui_tooltip = "Set a maximum opacity threshold for UI detection. If UI opacity is below the threshold, UI saving will be applied.";
+    ui_min = 0; ui_max = 1;
+> = 0.8;
+#endif
+#endif
+
 uniform bool bKeepUIOcclude <
     ui_category = "Options";
     ui_label = "Occlusion Assistance";
@@ -120,8 +144,15 @@ sampler KeepUI_Sampler { Texture = KeepUI_Tex; };
 
 void PS_KeepUI(float4 pos : SV_Position, float2 texcoord : TEXCOORD, out float4 color : SV_Target)
 {
+#if KeepUIType == 1 && KeepUIAlpha
+    float4 keep = tex2D(ReShade::BackBuffer, texcoord);
+    color = keep;
+    keep.a *= step(fKeepUIMaxAlpha, keep.a);
+    color = float4(lerp(color, keep, keep.a).rgb, keep.a);
+#else
     color = tex2D(ReShade::BackBuffer, texcoord);
     color.a = step(1.0, 1.0 - ReShade::GetLinearizedDepth(texcoord));
+#endif
 }
 
 #if KeepUIOccludeAssist
